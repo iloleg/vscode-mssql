@@ -111,7 +111,8 @@ export default class QueryRunner {
         this.batchSets = [];
         let queryDetails: QueryExecuteParams = {
             ownerUri: this._uri,
-            querySelection: selection
+            querySelection: selection,
+            returnActualExecutionPlan: true
         };
         this._resultLineOffset = selection ? selection.startLine : 0;
         this._isExecuting = true;

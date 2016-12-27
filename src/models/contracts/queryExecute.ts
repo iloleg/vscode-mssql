@@ -107,6 +107,7 @@ export namespace QueryExecuteRequest {
 export class QueryExecuteParams {
     ownerUri: string;
     querySelection: ISelectionData;
+    returnActualExecutionPlan: boolean;
 }
 
 export class QueryExecuteResult {
