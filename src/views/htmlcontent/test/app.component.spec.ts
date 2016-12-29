@@ -484,9 +484,6 @@ describe('AppComponent', function (): void {
             let jsonIcon = <HTMLElement> icons[1].firstElementChild;
             jsonIcon.click();
             expect(dataService.sendSaveRequest).toHaveBeenCalledWith(0, 0, 'json', []);
-            let xmlIcon = <HTMLElement> icons[2].firstElementChild;
-            xmlIcon.click();
-            expect(dataService.sendSaveRequest).toHaveBeenCalledWith(0, 0, 'xml', []);
         });
 
         it('should have maximized the grid when the icon is clicked', (done) => {
@@ -688,25 +685,6 @@ describe('AppComponent', function (): void {
             setTimeout(() => {
                 fixture.detectChanges();
                 expect(dataService.sendSaveRequest).toHaveBeenCalledWith(0, 0, 'csv', []);
-                done();
-            }, 100);
-        });
-
-        it('event save as xml', (done) => {
-            let dataService = <MockDataService> fixture.componentRef.injector.get(DataService);
-            let shortcutService = <MockShortcutService> fixture.componentRef.injector.get(ShortcutService);
-            spyOn(shortcutService, 'buildEventString').and.returnValue('');
-            spyOn(shortcutService, 'getEvent').and.returnValue(Promise.resolve('event.saveAsXML'));
-            spyOn(dataService, 'sendSaveRequest');
-            dataService.sendWSEvent(batchStart);
-            dataService.sendWSEvent(resultSetSmall);
-            dataService.sendWSEvent(batch2);
-            dataService.sendWSEvent(completeEvent);
-            fixture.detectChanges();
-            triggerKeyEvent(40, ele);
-            setTimeout(() => {
-                fixture.detectChanges();
-                expect(dataService.sendSaveRequest).toHaveBeenCalledWith(0, 0, 'xml', []);
                 done();
             }, 100);
         });

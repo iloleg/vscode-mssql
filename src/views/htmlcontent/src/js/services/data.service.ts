@@ -80,10 +80,10 @@ export class DataService {
     }
 
     /**
-     * send request to save the selected result set in the format provided
+     * send request to save the selected result set as csv
      * @param uri of the calling document
      * @param batchId The batch id of the batch with the result to save
-     * @param resultId The id of the result to save in the format provided
+     * @param resultId The id of the result to save as csv
      */
     sendSaveRequest(batchIndex: number, resultSetNumber: number, format: string, selection: ISlickRange[]): void {
         const self = this;
