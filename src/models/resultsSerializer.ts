@@ -127,6 +127,18 @@ export default class ResultsSerializer {
         return saveResultsParams;
     }
 
+    private getConfigForXml(): Contracts.SaveResultsAsXmlRequestParams {
+        // get save results config from vscode config
+        let config = vscode.workspace.getConfiguration(Constants.extensionConfigSectionName);
+        let saveConfig = config[Constants.configSaveAsXml];
+        let saveResultsParams = new Contracts.SaveResultsAsJsonRequestParams();
+
+        if (saveConfig) {
+            // TODO: assign config
+        }
+        return saveResultsParams;
+    }
+
     private resolveCurrentDirectory(uri: string): string {
         const self = this;
         self._isTempFile = false;
@@ -178,6 +190,8 @@ export default class ResultsSerializer {
             saveResultsParams =  self.getConfigForCsv();
         } else if (format === 'json') {
             saveResultsParams =  self.getConfigForJson();
+        } else if (format === 'xml') {
+            saveResultsParams =  self.getConfigForXml();
         }
 
         saveResultsParams.filePath = this._filePath;
@@ -214,6 +228,8 @@ export default class ResultsSerializer {
             type = Contracts.SaveResultsAsCsvRequest.type;
         } else if (format === 'json') {
             type = Contracts.SaveResultsAsJsonRequest.type;
+        } else if (format === 'xml') {
+            type = Contracts.SaveResultsAsXmlRequest.type;
         }
 
         self._vscodeWrapper.logToOutputChannel(Constants.msgSaveStarted + this._filePath);

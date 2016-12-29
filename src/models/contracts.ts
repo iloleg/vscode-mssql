@@ -73,6 +73,10 @@ export class SaveResultsAsJsonRequestParams extends SaveResultsRequestParams {
         // TODO: Define config for JSON
 }
 
+export class SaveResultsAsXmlRequestParams extends SaveResultsRequestParams {
+        // TODO: Define config for XML
+}
+
 export class SaveResultRequestResult {
         messages: string;
 }
@@ -90,3 +94,10 @@ export namespace SaveResultsAsJsonRequest {
     export const type: RequestType<SaveResultsAsJsonRequestParams, SaveResultRequestResult, void> = { get method(): string { return 'query/saveJson'; } };
 }
 // --------------------------------- </ Save Results as JSON Request > ------------------------------------------
+
+// --------------------------------- < Save Results as XML Request > ------------------------------------------
+// save results in csv format
+export namespace SaveResultsAsXmlRequest {
+    export const type: RequestType<SaveResultsAsXmlRequestParams, SaveResultRequestResult, void> = { get method(): string { return 'query/saveXml'; } };
+}
+// --------------------------------- </ Save Results as XML Request > ------------------------------------------

@@ -19,6 +19,8 @@ const template = `
         <span style="float: right; color: lightgrey; padding-left: 10px">{{keys['event.saveAsCSV']}}</span></li>
     <li id="savejson" (click)="handleContextActionClick('savejson')" [class.disabled]="isDisabled"> {{Constants.saveJSONLabel}}
         <span style="float: right; color: lightgrey; padding-left: 10px">{{keys['event.saveAsJSON']}}</span></li>
+    <li id="savexml" (click)="handleContextActionClick('savexml')" [class.disabled]="isDisabled"> {{Constants.saveXMLLabel}}
+        <span style="float: right; color: lightgrey; padding-left: 10px">{{keys['event.saveAsXML']}}</span></li>
     <li id="selectall" (click)="handleContextActionClick('selectall')" [class.disabled]="isDisabled"> {{Constants.selectAll}}
         <span style="float: right; color: lightgrey; padding-left: 10px">{{keys['event.selectAll']}}</span></li>
     <li id="copy" (click)="handleContextActionClick('copySelection')" [class.disabled]="isDisabled"> {{Constants.copyLabel}}
@@ -52,6 +54,7 @@ export class ContextMenu implements OnInit {
     private keys = {
         'event.saveAsCSV': '',
         'event.saveAsJSON': '',
+        'event.saveAsXML': '',
         'event.selectAll': '',
         'event.copySelection': '',
         'event.copyWithHeaders': ''

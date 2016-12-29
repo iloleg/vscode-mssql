@@ -197,6 +197,13 @@ export class AppComponent implements OnInit, AfterViewChecked {
             let resultId = this.renderedDataSets[activeGrid].resultId;
             let selection = this.slickgrids.toArray()[activeGrid].getSelectedRanges();
             this.dataService.sendSaveRequest(batchId, resultId, 'json', selection);
+        },
+        'event.saveAsXML': () => {
+            let activeGrid = this.activeGrid;
+            let batchId = this.renderedDataSets[activeGrid].batchId;
+            let resultId = this.renderedDataSets[activeGrid].resultId;
+            let selection = this.slickgrids.toArray()[activeGrid].getSelectedRanges();
+            this.dataService.sendSaveRequest(batchId, resultId, 'xml', selection);
         }
     };
     // tslint:disable-next-line:no-unused-variable
@@ -238,6 +245,19 @@ export class AppComponent implements OnInit, AfterViewChecked {
                 let selection = this.slickgrids.toArray()[index].getSelectedRanges();
                 if (selection.length <= 1) {
                     this.handleContextClick({type: 'savejson', batchId: batchId, resultId: resultId, index: index, selection: selection});
+                } else {
+                    this.dataService.showWarning(Constants.msgCannotSaveMultipleSelections);
+                }
+            }
+        },
+        {
+            showCondition: () => { return true; },
+            icon: () => { return 'saveXml'; },
+            hoverText: () => { return Constants.saveXMLLabel; },
+            functionality: (batchId, resultId, index) => {
+                let selection = this.slickgrids.toArray()[index].getSelectedRanges();
+                if (selection.length <= 1) {
+                    this.handleContextClick({type: 'savexml', batchId: batchId, resultId: resultId, index: index, selection: selection});
                 } else {
                     this.dataService.showWarning(Constants.msgCannotSaveMultipleSelections);
                 }
@@ -461,6 +481,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
                 break;
             case 'savejson':
                 this.dataService.sendSaveRequest(event.batchId, event.resultId, 'json', event.selection);
+                break;
+            case 'savexml':
+                this.dataService.sendSaveRequest(event.batchId, event.resultId, 'xml', event.selection);
                 break;
             case 'selectall':
                 this.activeGrid = event.index;
