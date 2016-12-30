@@ -223,8 +223,10 @@ export default class QueryRunner {
         batchSet.resultSetSummaries[resultSet.id] = resultSet;
 
         // if the result set is an xml showplan then display it as a showplan
-        if (resultSet.actualXMLShowplanForResultId >= 0) {
-            // bind showplan to its
+        // I need to check for 'null' here but tslint wont let me :(
+        // This is probably the most acceptable way in TS
+       /* tslint:disable */ if (resultSet.actualXMLShowplanForResultId != undefined) { /* tslint:enable */
+            // bind showplan to the resultset  it defines
         } else {
             // emit that a result set has completed and should be displayed
             this.eventEmitter.emit('resultSet', resultSet);
