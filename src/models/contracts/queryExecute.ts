@@ -7,6 +7,7 @@ export class ResultSetSummary {
     batchId: number;
     rowCount: number;
     columnInfo: IDbColumn[];
+    actualXMLShowplanForResultId: number;
 }
 
 export class BatchSummary {

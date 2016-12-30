@@ -221,7 +221,14 @@ export default class QueryRunner {
 
         // Store the result set in the batch and emit that a result set has completed
         batchSet.resultSetSummaries[resultSet.id] = resultSet;
-        this.eventEmitter.emit('resultSet', resultSet);
+
+        // if the result set is an xml showplan then display it as a showplan
+        if (resultSet.actualXMLShowplanForResultId >= 0) {
+            // bind showplan to its
+        } else {
+            // emit that a result set has completed and should be displayed
+            this.eventEmitter.emit('resultSet', resultSet);
+        }
     }
 
     // get more data rows from the current resultSets from the service layer
