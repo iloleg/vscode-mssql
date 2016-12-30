@@ -282,7 +282,8 @@ suite('Query Runner tests', () => {
                 batchId: 0,
                 columnInfo: [],
                 id: 0,
-                rowCount: 10
+                rowCount: 10,
+                actualXMLShowplanForResultId: -1
             }
         };
 
@@ -321,11 +322,11 @@ suite('Query Runner tests', () => {
         // ... Create resultset completion results
         let resultSetComplete1: QueryExecuteResultSetCompleteNotificationParams = {
             ownerUri: 'uri',
-            resultSetSummary: {batchId: 0, columnInfo: [], id: 0, rowCount: 10 }
+            resultSetSummary: {batchId: 0, columnInfo: [], id: 0, rowCount: 10, actualXMLShowplanForResultId: -1 }
         };
         let resultSetComplete2: QueryExecuteResultSetCompleteNotificationParams = {
             ownerUri: 'uri',
-            resultSetSummary: {batchId: 0, columnInfo: [], id: 1, rowCount: 10 }
+            resultSetSummary: {batchId: 0, columnInfo: [], id: 1, rowCount: 10, actualXMLShowplanForResultId: -1 }
         };
 
         // ... Create a mock event emitter to receive the events
@@ -516,7 +517,8 @@ suite('Query Runner tests', () => {
                     columnInfo: [
                         { columnName: 'Col1' },
                         { columnName: 'Col2' }
-                    ]
+                    ],
+                    actualXMLShowplanForResultId: -1
                 }],
                 executionElapsed: undefined,
                 executionStart: new Date().toISOString(),
