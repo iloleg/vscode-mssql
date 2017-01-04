@@ -15,7 +15,7 @@ import {
 import VscodeWrapper from './../src/controllers/vscodeWrapper';
 import StatusView from './../src/views/statusView';
 import * as Constants from '../src/models/constants';
-import { ISlickRange } from './../src/models/interfaces';
+import { ISlickRange, SpecialAction } from './../src/models/interfaces';
 import * as stubs from './stubs';
 
 const ncp = require('copy-paste');
@@ -196,7 +196,8 @@ suite('Query Runner tests', () => {
                 id: 0,
                 selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
                 messages: null,             // tslint:disable-line:no-null-keyword
-                resultSetSummaries: null    // tslint:disable-line:no-null-keyword
+                resultSetSummaries: null,   // tslint:disable-line:no-null-keyword
+                specialAction: null         // tslint:disable-line:no-null-keyword
             }
         };
 
@@ -230,7 +231,8 @@ suite('Query Runner tests', () => {
                 id: 0,
                 selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
                 messages: [{time: '', message: '6 affected rows'}],
-                resultSetSummaries: []
+                resultSetSummaries: [],
+                specialAction: SpecialAction.None
             }
         };
 
@@ -251,7 +253,8 @@ suite('Query Runner tests', () => {
             id: 0,
             selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
             messages: null,                 // tslint:disable-line:no-null-keyword
-            resultSetSummaries: []
+            resultSetSummaries: [],
+            specialAction: SpecialAction.None
         };
         let mockEventEmitter = TypeMoq.Mock.ofType(EventEmitter, TypeMoq.MockBehavior.Strict);
         mockEventEmitter.setup(x => x.emit('batchComplete', TypeMoq.It.isAny()));
@@ -283,7 +286,7 @@ suite('Query Runner tests', () => {
                 columnInfo: [],
                 id: 0,
                 rowCount: 10,
-                actualXMLShowplanForResultId: -1
+                specialAction: SpecialAction.None
             }
         };
 
@@ -301,7 +304,8 @@ suite('Query Runner tests', () => {
             id: 0,
             selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
             messages: null,                 // tslint:disable-line:no-null-keyword
-            resultSetSummaries: []
+            resultSetSummaries: [],
+            specialAction: SpecialAction.None
         };
         let mockEventEmitter = TypeMoq.Mock.ofType(EventEmitter, TypeMoq.MockBehavior.Strict);
         mockEventEmitter.setup(x => x.emit('resultSet', TypeMoq.It.isAny()));
@@ -322,11 +326,11 @@ suite('Query Runner tests', () => {
         // ... Create resultset completion results
         let resultSetComplete1: QueryExecuteResultSetCompleteNotificationParams = {
             ownerUri: 'uri',
-            resultSetSummary: {batchId: 0, columnInfo: [], id: 0, rowCount: 10, actualXMLShowplanForResultId: -1 }
+            resultSetSummary: {batchId: 0, columnInfo: [], id: 0, rowCount: 10, specialAction: SpecialAction.None}
         };
         let resultSetComplete2: QueryExecuteResultSetCompleteNotificationParams = {
             ownerUri: 'uri',
-            resultSetSummary: {batchId: 0, columnInfo: [], id: 1, rowCount: 10, actualXMLShowplanForResultId: -1 }
+            resultSetSummary: {batchId: 0, columnInfo: [], id: 1, rowCount: 10, specialAction: SpecialAction.None}
         };
 
         // ... Create a mock event emitter to receive the events
@@ -348,7 +352,8 @@ suite('Query Runner tests', () => {
             id: 0,
             selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
             messages: null,                 // tslint:disable-line:no-null-keyword
-            resultSetSummaries: []
+            resultSetSummaries: [],
+            specialAction: SpecialAction.None
         };
         queryRunner.eventEmitter = mockEventEmitter.object;
         queryRunner.handleResultSetComplete(resultSetComplete1);
@@ -379,7 +384,8 @@ suite('Query Runner tests', () => {
                 resultSetSummaries: [],
                 executionElapsed: undefined,
                 executionStart: new Date().toISOString(),
-                executionEnd: new Date().toISOString()
+                executionEnd: new Date().toISOString(),
+                specialAction: SpecialAction.None
             }]
         };
 
@@ -518,11 +524,12 @@ suite('Query Runner tests', () => {
                         { columnName: 'Col1' },
                         { columnName: 'Col2' }
                     ],
-                    actualXMLShowplanForResultId: -1
+                    specialAction: SpecialAction.None
                 }],
                 executionElapsed: undefined,
                 executionStart: new Date().toISOString(),
-                executionEnd: new Date().toISOString()
+                executionEnd: new Date().toISOString(),
+                specialAction: SpecialAction.None
             }]
         };
 

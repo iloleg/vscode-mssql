@@ -1,5 +1,5 @@
 import {RequestType, NotificationType} from 'vscode-languageclient';
-import { IDbColumn, ISelectionData, IResultMessage } from './../interfaces';
+import { IDbColumn, IExecutionPlanOptions, ISelectionData, IResultMessage, SpecialAction } from './../interfaces';
 
 
 export class ResultSetSummary {
@@ -7,7 +7,7 @@ export class ResultSetSummary {
     batchId: number;
     rowCount: number;
     columnInfo: IDbColumn[];
-    actualXMLShowplanForResultId: number;
+    specialAction: SpecialAction;
 }
 
 export class BatchSummary {
@@ -19,6 +19,7 @@ export class BatchSummary {
     executionElapsed: string;
     executionEnd: string;
     executionStart: string;
+    specialAction: SpecialAction;
 }
 
 // ------------------------------- < Query Dispose Request > ----------------------------------------
@@ -108,7 +109,7 @@ export namespace QueryExecuteRequest {
 export class QueryExecuteParams {
     ownerUri: string;
     querySelection: ISelectionData;
-    returnActualExecutionPlan: boolean;
+    executionPlanOptions: IExecutionPlanOptions;
 }
 
 export class QueryExecuteResult {

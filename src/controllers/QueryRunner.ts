@@ -11,7 +11,7 @@ import { BatchSummary, QueryExecuteParams, QueryExecuteRequest,
     QueryExecuteSubsetParams, QueryDisposeParams, QueryExecuteSubsetRequest,
     QueryDisposeRequest, QueryExecuteBatchNotificationParams } from '../models/contracts/queryExecute';
 import { QueryCancelParams, QueryCancelResult, QueryCancelRequest } from '../models/contracts/QueryCancel';
-import { ISlickRange, ISelectionData } from '../models/interfaces';
+import { ISlickRange, ISelectionData, IExecutionPlanOptions, SpecialAction } from '../models/interfaces';
 import Constants = require('../models/constants');
 import * as Utils from './../models/utils';
 
@@ -109,10 +109,17 @@ export default class QueryRunner {
         this._vscodeWrapper.logToOutputChannel(Utils.formatString(Constants.msgStartedExecute, this._uri));
         const self = this;
         this.batchSets = [];
+
+        // read options from config and populate interface
+        let options: IExecutionPlanOptions = {
+            includeActualExecutionPlan: true,
+            includeEstimatedExecutionPlan: false
+        };
+
         let queryDetails: QueryExecuteParams = {
             ownerUri: this._uri,
             querySelection: selection,
-            returnActualExecutionPlan: true
+            executionPlanOptions: options
         };
         this._resultLineOffset = selection ? selection.startLine : 0;
         this._isExecuting = true;
@@ -135,7 +142,8 @@ export default class QueryRunner {
                         resultSetSummaries: undefined,
                         executionElapsed: undefined,
                         executionEnd: undefined,
-                        executionStart: undefined
+                        executionStart: undefined,
+                        specialAction: undefined
                     }];
                 self.dataResolveReject.resolve();
                 this.eventEmitter.emit('batchStart', self._batchSets[0]);
@@ -171,7 +179,8 @@ export default class QueryRunner {
                 resultSetSummaries: [],
                 executionElapsed: undefined,
                 executionEnd: undefined,
-                executionStart: undefined
+                executionStart: undefined,
+                specialAction: undefined
             }];
             this.dataResolveReject.resolve(this.batchSets);
             this.eventEmitter.emit('complete');
@@ -223,13 +232,13 @@ export default class QueryRunner {
         batchSet.resultSetSummaries[resultSet.id] = resultSet;
 
         // if the result set is an xml showplan then display it as a showplan
-        // I need to check for 'null' here but tslint wont let me :(
-        // This is probably the most acceptable way in TS
-       /* tslint:disable */ if (resultSet.actualXMLShowplanForResultId != undefined) { /* tslint:enable */
-            // bind showplan to the resultset  it defines
-        } else {
+        if (resultSet.specialAction === SpecialAction.None) {
             // emit that a result set has completed and should be displayed
             this.eventEmitter.emit('resultSet', resultSet);
+        } else {
+            // import { SqlOutputContentProvider } from '../models/SqlOutputContentProvider';
+            // openLink(content, name, 'xml')
+            // bind showplan to the resultset  it defines
         }
     }
 
