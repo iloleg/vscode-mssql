@@ -80,28 +80,6 @@ export class DataService {
     }
 
     /**
-     * Get a specified number of rows starting at a specified row for
-     * the current results set
-     * @param start The starting row or the requested rows
-     * @param numberOfRows The amount of rows to return
-     * @param batchId The batch id of the batch you are querying
-     * @param resultId The id of the result you want to get the rows for
-     */
-    openExecutionPlan(batchId: number, resultId: number): void {
-        const self = this;
-        let headers = new Headers();
-        let url = '/openExecutionPlan?'
-                        + '&uri=' + self.uri
-                        + '&batchId=' + batchId
-                        + '&resultId=' + resultId;
-        self.http.post(url, { headers: headers })
-            .subscribe(undefined, err => {
-                self.showError(err.statusText);
-            });
-    }
-
-
-    /**
      * send request to save the selected result set as csv
      * @param uri of the calling document
      * @param batchId The batch id of the batch with the result to save

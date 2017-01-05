@@ -15,6 +15,7 @@ import { QueryCancelParams, QueryCancelResult, QueryCancelRequest } from '../mod
 import { ISlickRange, ISelectionData, IExecutionPlanOptions, SpecialAction } from '../models/interfaces';
 import Constants = require('../models/constants');
 import * as Utils from './../models/utils';
+import { SqlOutputContentProvider } from '../models/SqlOutputContentProvider';
 
 const ncp = require('copy-paste');
 
@@ -239,11 +240,18 @@ export default class QueryRunner {
             // emit that a result set has completed and should be displayed
             this.eventEmitter.emit('resultSet', resultSet);
         } else {
-            // import { SqlOutputContentProvider } from '../models/SqlOutputContentProvider';
-            // openLink(content, name, 'xml')
-            // bind showplan to the resultset  it defines
-            this.eventEmitter.emit('executionPlan', resultSet);
+            this.openExecutionPlan(resultSet.batchId, resultSet.id);
+
         }
+    }
+
+    private openExecutionPlan(batchId: number, resultId: number): void {
+        this.getExecutionPlan(batchId, resultId).then((results: QueryExecutionPlanResult) => {
+            let linkType = 'xml';
+            let fileName = 'Estimated_Plan';
+            let content = results.executionPlan.content;
+            SqlOutputContentProvider.openLink(content, fileName, linkType, this._vscodeWrapper);
+        });
     }
 
     // get more data rows from the current resultSets from the service layer

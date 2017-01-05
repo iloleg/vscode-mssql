@@ -423,10 +423,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
                     self.messagesAdded = true;
                     self.onScroll(0);
                 break;
-                case 'executionPlan':
-                    let result = event.data;
-                    self.dataService.openExecutionPlan(result.batchId, result.id);
-                break;
                 default:
                     console.error('Unexpected web socket event type "' + event.type + '" sent');
                 break;

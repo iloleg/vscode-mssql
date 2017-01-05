@@ -176,20 +176,6 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             res.send(json);
         });
 
-        // add http handler for /executionPlan - return an executionPlan end-point
-        this._service.addPostHandler(Interfaces.ContentType.OpenExecutionPlan, (req, res): void => {
-            let resultId = req.query.resultId;
-            let batchId = req.query.batchId;
-            let uri: string = req.query.uri;
-            let a = self._queryResultsMap.get(uri);
-            let b = a.queryRunner;
-            b.getExecutionPlan(batchId, resultId).then(results => {
-                self.openLink(results.executionPlan.content, 'Estimated Showplan', results.executionPlan.format);
-                res.status = 200;
-                res.send();
-            });
-        });
-
         // add http handler for '/saveResults' - return success message as JSON
         this._service.addPostHandler(Interfaces.ContentType.SaveResults, (req, res): void => {
             let uri: string = req.query.uri;
@@ -209,7 +195,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             let content: string = req.body.content;
             let columnName: string = req.body.columnName;
             let linkType: string = req.body.type;
-            self.openLink(content, columnName, linkType);
+            SqlOutputContentProvider.openLink(content, columnName, linkType, this._vscodeWrapper);
             res.status = 200;
             res.send();
         });
@@ -307,9 +293,6 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             queryRunner = new QueryRunner(uri, title, statusView);
             queryRunner.eventEmitter.on('resultSet', (resultSet) => {
                 this._service.broadcast(resultsUri, 'resultSet', resultSet);
-            });
-            queryRunner.eventEmitter.on('executionPlan', (resultSet) => {
-                this._service.broadcast(resultsUri, 'executionPlan', resultSet);
             });
             queryRunner.eventEmitter.on('batchStart', (batch) => {
                 this._service.broadcast(resultsUri, 'batchStart', batch);
@@ -469,7 +452,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
     /**
      * Open a xml/json link - Opens the content in a new editor pane
      */
-    public openLink(content: string, columnName: string, linkType: string): void {
+    public static openLink(content: string, columnName: string, linkType: string, vscodeWrapper: VscodeWrapper): void {
         const self = this;
         let tempFileName = self.getXmlTempFileName(columnName, linkType);
         let uri = vscode.Uri.parse('untitled:' + tempFileName);
@@ -498,14 +481,14 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
                     edit.insert(new vscode.Position(0, 0), content);
                 }).then(result => {
                     if (!result) {
-                        self._vscodeWrapper.showErrorMessage(Constants.msgCannotOpenContent);
+                        vscodeWrapper.showErrorMessage(Constants.msgCannotOpenContent);
                     }
                 });
             }, (error: any) => {
-                self._vscodeWrapper.showErrorMessage(error);
+                vscodeWrapper.showErrorMessage(error);
             });
         }, (error: any) => {
-            self._vscodeWrapper.showErrorMessage(error);
+            vscodeWrapper.showErrorMessage(error);
         });
     }
 
@@ -537,7 +520,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
     /**
      * Return temp file name for opening a link
      */
-    private getXmlTempFileName(columnName: string, linkType: string): string {
+    private static getXmlTempFileName(columnName: string, linkType: string): string {
         if (columnName === 'XML Showplan') {
             columnName = 'Showplan';
         }
