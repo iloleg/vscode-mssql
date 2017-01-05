@@ -9,7 +9,8 @@ import { BatchSummary, QueryExecuteParams, QueryExecuteRequest,
     QueryExecuteCompleteNotificationResult, QueryExecuteSubsetResult,
     QueryExecuteResultSetCompleteNotificationParams,
     QueryExecuteSubsetParams, QueryDisposeParams, QueryExecuteSubsetRequest,
-    QueryDisposeRequest, QueryExecuteBatchNotificationParams } from '../models/contracts/queryExecute';
+    QueryDisposeRequest, QueryExecuteBatchNotificationParams,
+    QueryExecutionPlanRequest, QueryExecutionPlanResult, QueryExecutionPlanParams } from '../models/contracts/queryExecute';
 import { QueryCancelParams, QueryCancelResult, QueryCancelRequest } from '../models/contracts/QueryCancel';
 import { ISlickRange, ISelectionData, IExecutionPlanOptions, SpecialAction } from '../models/interfaces';
 import Constants = require('../models/constants');
@@ -105,16 +106,18 @@ export default class QueryRunner {
     }
 
     // Pulls the query text from the current document/selection and initiates the query
-    public runQuery(selection: ISelectionData): Thenable<void> {
+    public runQuery(selection: ISelectionData, options?: IExecutionPlanOptions): Thenable<void> {
         this._vscodeWrapper.logToOutputChannel(Utils.formatString(Constants.msgStartedExecute, this._uri));
         const self = this;
         this.batchSets = [];
 
-        // read options from config and populate interface
-        let options: IExecutionPlanOptions = {
-            includeActualExecutionPlan: true,
-            includeEstimatedExecutionPlan: false
-        };
+        // if no options defined set to defaults
+        if (options === undefined) {
+            options = {
+                includeActualExecutionPlan: false,
+                includeEstimatedExecutionPlan: false
+            };
+        }
 
         let queryDetails: QueryExecuteParams = {
             ownerUri: this._uri,
@@ -239,6 +242,7 @@ export default class QueryRunner {
             // import { SqlOutputContentProvider } from '../models/SqlOutputContentProvider';
             // openLink(content, name, 'xml')
             // bind showplan to the resultset  it defines
+            this.eventEmitter.emit('executionPlan', resultSet);
         }
     }
 
@@ -255,6 +259,25 @@ export default class QueryRunner {
             self._client.sendRequest(QueryExecuteSubsetRequest.type, queryDetails).then(result => {
                 if (result.message) {
                     self._vscodeWrapper.showErrorMessage('Something went wrong getting more rows: ' + result.message);
+                    reject();
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+
+     // get the execution plan from a batch's result
+    public getExecutionPlan(batchIndex: number, resultSetIndex: number): Thenable<QueryExecutionPlanResult> {
+        const self = this;
+        let queryDetails = new QueryExecutionPlanParams();
+        queryDetails.ownerUri = this.uri;
+        queryDetails.resultSetIndex = resultSetIndex;
+        queryDetails.batchIndex = batchIndex;
+        return new Promise<QueryExecutionPlanResult>((resolve, reject) => {
+            self._client.sendRequest(QueryExecutionPlanRequest.type, queryDetails).then(result => {
+                if (result.message) {
+                    self._vscodeWrapper.showErrorMessage('Something went wrong getting the execution plan: ' + result.message);
                     reject();
                 } else {
                     resolve(result);

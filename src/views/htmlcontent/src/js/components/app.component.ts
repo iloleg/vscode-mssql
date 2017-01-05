@@ -354,6 +354,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
                         self._messageActive = true;
                     }
                     self.messagesAdded = true;
+
+
                 break;
                 case 'resultSet':
                     let resultSet = event.data;
@@ -420,6 +422,10 @@ export class AppComponent implements OnInit, AfterViewChecked {
                     self.placeHolderDataSets.push(undefinedDataSet);
                     self.messagesAdded = true;
                     self.onScroll(0);
+                break;
+                case 'executionPlan':
+                    let result = event.data;
+                    self.dataService.openExecutionPlan(result.batchId, result.id);
                 break;
                 default:
                     console.error('Unexpected web socket event type "' + event.type + '" sent');

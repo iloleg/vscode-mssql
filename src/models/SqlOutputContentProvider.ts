@@ -10,7 +10,7 @@ import QueryRunner from '../controllers/QueryRunner';
 import ResultsSerializer from  '../models/resultsSerializer';
 import StatusView from '../views/statusView';
 import VscodeWrapper from './../controllers/vscodeWrapper';
-import { ISelectionData } from './interfaces';
+import { ISelectionData, IExecutionPlanOptions } from './interfaces';
 const pd = require('pretty-data').pd;
 const fs = require('fs');
 
@@ -176,6 +176,20 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             res.send(json);
         });
 
+        // add http handler for /executionPlan - return an executionPlan end-point
+        this._service.addPostHandler(Interfaces.ContentType.OpenExecutionPlan, (req, res): void => {
+            let resultId = req.query.resultId;
+            let batchId = req.query.batchId;
+            let uri: string = req.query.uri;
+            let a = self._queryResultsMap.get(uri);
+            let b = a.queryRunner;
+            b.getExecutionPlan(batchId, resultId).then(results => {
+                self.openLink(results.executionPlan.content, 'Estimated Showplan', results.executionPlan.format);
+                res.status = 200;
+                res.send();
+            });
+        });
+
         // add http handler for '/saveResults' - return success message as JSON
         this._service.addPostHandler(Interfaces.ContentType.SaveResults, (req, res): void => {
             let uri: string = req.query.uri;
@@ -268,7 +282,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             : this._queryResultsMap.get(uri).queryRunner.isExecutingQuery;
     }
 
-    public runQuery(statusView, uri: string, selection: ISelectionData, title: string): void {
+    public runQuery(statusView, uri: string, selection: ISelectionData, title: string, options?: IExecutionPlanOptions): void {
         // Reuse existing query runner if it exists
         let resultsUri = this.getResultsUri(uri);
         let queryRunner: QueryRunner;
@@ -294,6 +308,9 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             queryRunner.eventEmitter.on('resultSet', (resultSet) => {
                 this._service.broadcast(resultsUri, 'resultSet', resultSet);
             });
+            queryRunner.eventEmitter.on('executionPlan', (resultSet) => {
+                this._service.broadcast(resultsUri, 'executionPlan', resultSet);
+            });
             queryRunner.eventEmitter.on('batchStart', (batch) => {
                 this._service.broadcast(resultsUri, 'batchStart', batch);
             });
@@ -309,7 +326,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             this._queryResultsMap.set(resultsUri, new QueryRunnerState(queryRunner));
         }
 
-        queryRunner.runQuery(selection);
+        queryRunner.runQuery(selection, options);
         let paneTitle = Utils.formatString(Constants.titleResultsPane, queryRunner.title);
         // Always run this command even if just updating to avoid a bug - tfs 8686842
 
@@ -476,7 +493,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
         }
 
         vscode.workspace.openTextDocument(uri).then((doc: vscode.TextDocument) => {
-            vscode.window.showTextDocument(doc, 1, false).then(editor => {
+            vscode.window.showTextDocument(doc, 2, false).then(editor => {
                 editor.edit(edit => {
                     edit.insert(new vscode.Position(0, 0), content);
                 }).then(result => {

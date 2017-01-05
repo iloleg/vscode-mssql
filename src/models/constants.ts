@@ -16,6 +16,7 @@ export const cmdChooseDatabase = 'extension.chooseDatabase';
 export const cmdShowReleaseNotes = 'extension.showReleaseNotes';
 export const cmdShowGettingStarted = 'extension.showGettingStarted';
 export const cmdManageConnectionProfiles = 'extension.manageProfiles';
+export const cmdEstimatedExecutionPlan = 'extension.estimatedExecutionPlan';
 
 export const sqlDbPrefix = '.database.windows.net';
 export const defaultConnectionTimeout = 15;
@@ -38,6 +39,7 @@ export const outputContentTypeRows = 'rows';
 export const outputContentTypeConfig = 'config';
 export const outputContentTypeSaveResults = 'saveResults';
 export const outputContentTypeOpenLink = 'openLink';
+export const outputContentTypeOpenExecutionPlan = 'openExecutionPlan';
 export const outputContentTypeCopy = 'copyResults';
 export const outputContentTypeEditorSelection = 'setEditorSelection';
 export const outputContentTypeShowError = 'showError';

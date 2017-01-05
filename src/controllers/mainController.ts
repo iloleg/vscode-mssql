@@ -16,7 +16,7 @@ import { IPrompter } from '../prompts/question';
 import CodeAdapter from '../prompts/adapter';
 import Telemetry from '../models/telemetry';
 import VscodeWrapper from './vscodeWrapper';
-import { ISelectionData } from './../models/interfaces';
+import { ISelectionData, IExecutionPlanOptions } from './../models/interfaces';
 import * as path from 'path';
 import fs = require('fs');
 
@@ -104,6 +104,8 @@ export default class MainController implements vscode.Disposable {
         this._event.on(Constants.cmdCancelQuery, () => { self.onCancelQuery(); });
         this.registerCommand(Constants.cmdShowGettingStarted);
         this._event.on(Constants.cmdShowGettingStarted, () => { self.launchGettingStartedPage(); });
+        this.registerCommand(Constants.cmdEstimatedExecutionPlan);
+        this._event.on(Constants.cmdEstimatedExecutionPlan, () => { self.onEstimatedExecutionPlan(); });
 
         this._vscodeWrapper = new VscodeWrapper();
 
@@ -280,6 +282,71 @@ export default class MainController implements vscode.Disposable {
             }
         } catch (err) {
             Telemetry.sendTelemetryEventForException(err, 'OnRunquery');
+        }
+
+    }
+
+    public onEstimatedExecutionPlan(): void {
+        try {
+            if (!this.CanRunCommand()) {
+                return;
+            }
+            const self = this;
+            if (!this._vscodeWrapper.isEditingSqlFile) {
+                // Prompt the user to change the language mode to SQL before running a query
+                this._connectionMgr.connectionUI.promptToChangeLanguageMode().then( result => {
+                    if (result) {
+                        self.onEstimatedExecutionPlan();
+                    }
+                }).catch(err => {
+                    self._vscodeWrapper.showErrorMessage(Constants.msgError + err);
+                });
+            } else if (!this._connectionMgr.isConnected(this._vscodeWrapper.activeTextEditorUri)) {
+                // If we are disconnected, prompt the user to choose a connection before executing
+                this.onNewConnection().then(result => {
+                    if (result) {
+                        self.onEstimatedExecutionPlan();
+                    }
+                }).catch(err => {
+                    self._vscodeWrapper.showErrorMessage(Constants.msgError + err);
+                });
+            } else {
+                let editor = this._vscodeWrapper.activeTextEditor;
+                let uri = this._vscodeWrapper.activeTextEditorUri;
+                let title = path.basename(editor.document.fileName);
+                let querySelection: ISelectionData;
+
+                // Calculate the selection if we have a selection, otherwise we'll use null to indicate
+                // the entire document is the selection
+                if (!editor.selection.isEmpty) {
+                    let selection = editor.selection;
+                    querySelection = {
+                        startLine: selection.start.line,
+                        startColumn: selection.start.character,
+                        endLine: selection.end.line,
+                        endColumn: selection.end.character
+                    };
+                }
+
+                // Trim down the selection. If it is empty after selecting, then we don't execute
+                let selectionToTrim = editor.selection.isEmpty ? undefined : editor.selection;
+                if (editor.document.getText(selectionToTrim).trim().length === 0) {
+                    return;
+                }
+
+                // TODO: update telemetry
+                // Telemetry.sendTelemetryEvent('RunQuery');
+
+                let options: IExecutionPlanOptions = {
+                    includeActualExecutionPlan: false,
+                    includeEstimatedExecutionPlan: true
+                };
+
+                this._outputContentProvider.runQuery(this._statusview, uri, querySelection, title, options);
+            }
+        } catch (err) {
+            // TODO: update telemetry failed event
+            // Telemetry.sendTelemetryEventForException(err, 'OnRunquery');
         }
 
     }

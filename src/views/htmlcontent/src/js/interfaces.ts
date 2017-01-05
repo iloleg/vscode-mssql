@@ -46,6 +46,11 @@ export class ResultSetSubset {
     rows: any[][];
 }
 
+export class ExecutionPlan {
+    format: string;
+    content: string;
+}
+
 export class ResultSetSummary {
     id: number;
     rowCount: number;

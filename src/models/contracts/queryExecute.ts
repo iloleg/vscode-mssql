@@ -146,3 +146,30 @@ export class QueryExecuteSubsetResult {
 }
 
 // --------------------------------- </ Query Results Request > ------------------------------------------
+
+// --------------------------------- < Query Results Request > ------------------------------------------
+export namespace QueryExecutionPlanRequest {
+    export const type: RequestType<QueryExecutionPlanParams, QueryExecutionPlanResult, void> = {
+                                                                                        get method(): string {
+                                                                                            return 'query/executionPlan';
+                                                                                        }
+                                                                                    };
+}
+
+export class QueryExecutionPlanParams {
+    ownerUri: string;
+    batchIndex: number;
+    resultSetIndex: number;
+}
+
+export class ExecutionPlan {
+    format: string;
+    content: string;
+}
+
+export class QueryExecutionPlanResult {
+    message: string;
+    executionPlan: ExecutionPlan;
+}
+
+// --------------------------------- </ Query Results Request > ------------------------------------------
