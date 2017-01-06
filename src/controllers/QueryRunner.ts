@@ -12,7 +12,7 @@ import { BatchSummary, QueryExecuteParams, QueryExecuteRequest,
     QueryDisposeRequest, QueryExecuteBatchNotificationParams,
     QueryExecutionPlanRequest, QueryExecutionPlanResult, QueryExecutionPlanParams } from '../models/contracts/queryExecute';
 import { QueryCancelParams, QueryCancelResult, QueryCancelRequest } from '../models/contracts/QueryCancel';
-import { ISlickRange, ISelectionData, IExecutionPlanOptions, SpecialAction } from '../models/interfaces';
+import { ISlickRange, ISelectionData, IExecutionPlanOptions, ISpecialAction } from '../models/interfaces';
 import Constants = require('../models/constants');
 import * as Utils from './../models/utils';
 import { SqlOutputContentProvider } from '../models/SqlOutputContentProvider';
@@ -236,12 +236,11 @@ export default class QueryRunner {
         batchSet.resultSetSummaries[resultSet.id] = resultSet;
 
         // if the result set is an xml showplan then display it as a showplan
-        if (resultSet.specialAction === SpecialAction.None) {
+        if (resultSet.specialAction === undefined || resultSet.specialAction.None) {
             // emit that a result set has completed and should be displayed
             this.eventEmitter.emit('resultSet', resultSet);
         } else {
             this.openExecutionPlan(resultSet.batchId, resultSet.id);
-
         }
     }
 

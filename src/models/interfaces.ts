@@ -263,21 +263,15 @@ export interface IExecutionPlanOptions {
     includeEstimatedExecutionPlan: boolean;
 }
 
-/* tslint:disable */
-export enum SpecialAction
-{
-    None = 0x0,
-    ExpectActualExecutionPlan = 0x1,
-    ExpectEstimatedExecutionPlan = 0x2,
-    ExpectActualYukonXmlShowPlan = 0x4,
-    ExpectEstimatedYukonXmlShowPlan	= 0x8,
-    ExecuteWithDebugging = 0x10,
-    ExecuteLivePlan = 0x20,
-    HideYukonXMLShowPlan = 0x40,
-    ExpectYukonXmlShowPlan  = ExpectActualYukonXmlShowPlan | ExpectEstimatedYukonXmlShowPlan,
-    ShowPlanMask = ExpectYukonXmlShowPlan | ExpectActualExecutionPlan | ExpectEstimatedExecutionPlan
+export interface ISpecialAction {
+    None: boolean;
+    ExpectActualExecutionPlan: boolean;
+    ExpectEstimatedExecutionPlan: boolean;
+    ExpectActualYukonXmlShowPlan: boolean;
+    ExpectEstimatedYukonXmlShowPlan: boolean;
+    ExpectActualYukonTextShowPlan: boolean;
+    ExpectEstimatedYukonTextShowPlan: boolean;
 };
-/* tslint:enable */
 
 export interface IResultMessage {
     time: string;
