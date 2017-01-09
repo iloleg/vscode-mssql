@@ -12,7 +12,7 @@ import { BatchSummary, QueryExecuteParams, QueryExecuteRequest,
     QueryDisposeRequest, QueryExecuteBatchNotificationParams,
     QueryExecutionPlanRequest, QueryExecutionPlanResult, QueryExecutionPlanParams } from '../models/contracts/queryExecute';
 import { QueryCancelParams, QueryCancelResult, QueryCancelRequest } from '../models/contracts/QueryCancel';
-import { ISlickRange, ISelectionData, IExecutionPlanOptions, ISpecialAction } from '../models/interfaces';
+import { ISlickRange, ISelectionData, IExecutionPlanOptions } from '../models/interfaces';
 import Constants = require('../models/constants');
 import * as Utils from './../models/utils';
 import { SqlOutputContentProvider } from '../models/SqlOutputContentProvider';
@@ -107,19 +107,10 @@ export default class QueryRunner {
     }
 
     // Pulls the query text from the current document/selection and initiates the query
-    public runQuery(selection: ISelectionData, options?: IExecutionPlanOptions): Thenable<void> {
+    public runQuery(selection: ISelectionData, options: IExecutionPlanOptions): Thenable<void> {
         this._vscodeWrapper.logToOutputChannel(Utils.formatString(Constants.msgStartedExecute, this._uri));
         const self = this;
         this.batchSets = [];
-
-        // if no options defined set to defaults
-        if (options === undefined) {
-            options = {
-                includeActualExecutionPlan: false,
-                includeEstimatedExecutionPlan: false
-            };
-        }
-
         let queryDetails: QueryExecuteParams = {
             ownerUri: this._uri,
             querySelection: selection,
@@ -236,7 +227,7 @@ export default class QueryRunner {
         batchSet.resultSetSummaries[resultSet.id] = resultSet;
 
         // if the result set is an xml showplan then display it as a showplan
-        if (resultSet.specialAction === undefined || resultSet.specialAction.None) {
+        if (resultSet.specialAction === undefined || resultSet.specialAction.none) {
             // emit that a result set has completed and should be displayed
             this.eventEmitter.emit('resultSet', resultSet);
         } else {

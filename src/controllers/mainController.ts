@@ -38,6 +38,7 @@ export default class MainController implements vscode.Disposable {
     private _lastSavedTimer: Utils.Timer;
     private _lastOpenedUri: string;
     private _lastOpenedTimer: Utils.Timer;
+    private _defaultExecutionPlanOptions: IExecutionPlanOptions;
 
     /**
      * The main controller constructor
@@ -53,6 +54,14 @@ export default class MainController implements vscode.Disposable {
         if (vscodeWrapper) {
             this._vscodeWrapper = vscodeWrapper;
         }
+
+        // Settup default options for execution plan
+        this._defaultExecutionPlanOptions = {
+            includeEstimatedExecutionPlanXml: false,
+            includeActualExecutionPlanXml: false,
+            includeActualExecutionPlanText: false,
+            includeEstimatedExecutionPlanText: false
+        };
     }
 
     /**
@@ -95,7 +104,7 @@ export default class MainController implements vscode.Disposable {
         this.registerCommand(Constants.cmdDisconnect);
         this._event.on(Constants.cmdDisconnect, () => { self.runAndLogErrors(self.onDisconnect(), 'onDisconnect'); });
         this.registerCommand(Constants.cmdRunQuery);
-        this._event.on(Constants.cmdRunQuery, () => { self.onRunQuery(); });
+        this._event.on(Constants.cmdRunQuery, () => { self.onRunQuery(this._defaultExecutionPlanOptions); });
         this.registerCommand(Constants.cmdManageConnectionProfiles);
         this._event.on(Constants.cmdManageConnectionProfiles, () => { self.runAndLogErrors(self.onManageProfiles(), 'onManageProfiles'); });
         this.registerCommand(Constants.cmdChooseDatabase);
@@ -228,7 +237,7 @@ export default class MainController implements vscode.Disposable {
     /**
      * get the T-SQL query from the editor, run it and show output
      */
-    public onRunQuery(): void {
+    public onRunQuery(options: IExecutionPlanOptions): void {
         try {
             if (!this.CanRunCommand()) {
                 return;
@@ -238,7 +247,7 @@ export default class MainController implements vscode.Disposable {
                 // Prompt the user to change the language mode to SQL before running a query
                 this._connectionMgr.connectionUI.promptToChangeLanguageMode().then( result => {
                     if (result) {
-                        self.onRunQuery();
+                        self.onRunQuery(options);
                     }
                 }).catch(err => {
                     self._vscodeWrapper.showErrorMessage(Constants.msgError + err);
@@ -247,7 +256,7 @@ export default class MainController implements vscode.Disposable {
                 // If we are disconnected, prompt the user to choose a connection before executing
                 this.onNewConnection().then(result => {
                     if (result) {
-                        self.onRunQuery();
+                        self.onRunQuery(options);
                     }
                 }).catch(err => {
                     self._vscodeWrapper.showErrorMessage(Constants.msgError + err);
@@ -278,7 +287,7 @@ export default class MainController implements vscode.Disposable {
 
                 Telemetry.sendTelemetryEvent('RunQuery');
 
-                this._outputContentProvider.runQuery(this._statusview, uri, querySelection, title);
+                this._outputContentProvider.runQuery(this._statusview, uri, querySelection, title, options);
             }
         } catch (err) {
             Telemetry.sendTelemetryEventForException(err, 'OnRunquery');
@@ -287,68 +296,15 @@ export default class MainController implements vscode.Disposable {
     }
 
     public onEstimatedExecutionPlan(): void {
-        try {
-            if (!this.CanRunCommand()) {
-                return;
-            }
-            const self = this;
-            if (!this._vscodeWrapper.isEditingSqlFile) {
-                // Prompt the user to change the language mode to SQL before running a query
-                this._connectionMgr.connectionUI.promptToChangeLanguageMode().then( result => {
-                    if (result) {
-                        self.onEstimatedExecutionPlan();
-                    }
-                }).catch(err => {
-                    self._vscodeWrapper.showErrorMessage(Constants.msgError + err);
-                });
-            } else if (!this._connectionMgr.isConnected(this._vscodeWrapper.activeTextEditorUri)) {
-                // If we are disconnected, prompt the user to choose a connection before executing
-                this.onNewConnection().then(result => {
-                    if (result) {
-                        self.onEstimatedExecutionPlan();
-                    }
-                }).catch(err => {
-                    self._vscodeWrapper.showErrorMessage(Constants.msgError + err);
-                });
-            } else {
-                let editor = this._vscodeWrapper.activeTextEditor;
-                let uri = this._vscodeWrapper.activeTextEditorUri;
-                let title = path.basename(editor.document.fileName);
-                let querySelection: ISelectionData;
+        let options: IExecutionPlanOptions = {
+            includeEstimatedExecutionPlanXml: true,
+            includeActualExecutionPlanXml: false,
+            includeActualExecutionPlanText: false,
+            includeEstimatedExecutionPlanText: false
+        };
 
-                // Calculate the selection if we have a selection, otherwise we'll use null to indicate
-                // the entire document is the selection
-                if (!editor.selection.isEmpty) {
-                    let selection = editor.selection;
-                    querySelection = {
-                        startLine: selection.start.line,
-                        startColumn: selection.start.character,
-                        endLine: selection.end.line,
-                        endColumn: selection.end.character
-                    };
-                }
-
-                // Trim down the selection. If it is empty after selecting, then we don't execute
-                let selectionToTrim = editor.selection.isEmpty ? undefined : editor.selection;
-                if (editor.document.getText(selectionToTrim).trim().length === 0) {
-                    return;
-                }
-
-                // TODO: update telemetry
-                // Telemetry.sendTelemetryEvent('RunQuery');
-
-                let options: IExecutionPlanOptions = {
-                    includeActualExecutionPlan: false,
-                    includeEstimatedExecutionPlan: true
-                };
-
-                this._outputContentProvider.runQuery(this._statusview, uri, querySelection, title, options);
-            }
-        } catch (err) {
-            // TODO: update telemetry failed event
-            // Telemetry.sendTelemetryEventForException(err, 'OnRunquery');
-        }
-
+        // Run the query with estimated showplan turned on
+        this.onRunQuery(options);
     }
 
     /**

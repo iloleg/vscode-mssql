@@ -259,18 +259,21 @@ export interface ISelectionData {
 }
 
 export interface IExecutionPlanOptions {
-    includeActualExecutionPlan: boolean;
-    includeEstimatedExecutionPlan: boolean;
+    includeActualExecutionPlanXml: boolean;
+    includeEstimatedExecutionPlanXml: boolean;
+    includeActualExecutionPlanText: boolean;
+    includeEstimatedExecutionPlanText: boolean;
+
 }
 
 export interface ISpecialAction {
-    None: boolean;
-    ExpectActualExecutionPlan: boolean;
-    ExpectEstimatedExecutionPlan: boolean;
-    ExpectActualYukonXmlShowPlan: boolean;
-    ExpectEstimatedYukonXmlShowPlan: boolean;
-    ExpectActualYukonTextShowPlan: boolean;
-    ExpectEstimatedYukonTextShowPlan: boolean;
+    none: boolean;
+    expectActualExecutionPlan: boolean;
+    expectEstimatedExecutionPlan: boolean;
+    expectActualYukonXmlShowPlan: boolean;
+    expectEstimatedYukonXmlShowPlan: boolean;
+    expectActualTextShowPlan: boolean;
+    expectEstimatedTextShowPlan: boolean;
 };
 
 export interface IResultMessage {

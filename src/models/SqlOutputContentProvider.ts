@@ -268,7 +268,7 @@ export class SqlOutputContentProvider implements vscode.TextDocumentContentProvi
             : this._queryResultsMap.get(uri).queryRunner.isExecutingQuery;
     }
 
-    public runQuery(statusView, uri: string, selection: ISelectionData, title: string, options?: IExecutionPlanOptions): void {
+    public runQuery(statusView, uri: string, selection: ISelectionData, title: string, options: IExecutionPlanOptions): void {
         // Reuse existing query runner if it exists
         let resultsUri = this.getResultsUri(uri);
         let queryRunner: QueryRunner;

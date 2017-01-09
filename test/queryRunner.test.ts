@@ -15,7 +15,7 @@ import {
 import VscodeWrapper from './../src/controllers/vscodeWrapper';
 import StatusView from './../src/views/statusView';
 import * as Constants from '../src/models/constants';
-import { ISlickRange, SpecialAction } from './../src/models/interfaces';
+import { ISlickRange, IExecutionPlanOptions } from './../src/models/interfaces';
 import * as stubs from './stubs';
 
 const ncp = require('copy-paste');
@@ -27,6 +27,7 @@ suite('Query Runner tests', () => {
     let testQueryNotificationHandler: TypeMoq.Mock<QueryNotificationHandler>;
     let testVscodeWrapper: TypeMoq.Mock<VscodeWrapper>;
     let testStatusView: TypeMoq.Mock<StatusView>;
+    let executionPlanOptions: IExecutionPlanOptions;
 
     setup(() => {
         testSqlOutputContentProvider = TypeMoq.Mock.ofType(SqlOutputContentProvider, TypeMoq.MockBehavior.Strict, {extensionPath: ''});
@@ -34,6 +35,12 @@ suite('Query Runner tests', () => {
         testQueryNotificationHandler = TypeMoq.Mock.ofType(QueryNotificationHandler, TypeMoq.MockBehavior.Strict);
         testVscodeWrapper = TypeMoq.Mock.ofType(VscodeWrapper, TypeMoq.MockBehavior.Strict);
         testStatusView = TypeMoq.Mock.ofType(StatusView, TypeMoq.MockBehavior.Strict);
+        executionPlanOptions = {
+            includeActualExecutionPlanText: false,
+            includeActualExecutionPlanXml: false,
+            includeEstimatedExecutionPlanText: false,
+            includeEstimatedExecutionPlanXml: false
+        };
 
     });
 
@@ -81,7 +88,7 @@ suite('Query Runner tests', () => {
         mockEventEmitter.setup(x => x.emit('complete'));
         queryRunner.eventEmitter = mockEventEmitter.object;
 
-        return queryRunner.runQuery(testSelection).then(() => {
+        return queryRunner.runQuery(testSelection, executionPlanOptions).then(() => {
             testQueryNotificationHandler.verify(x => x.registerRunner(TypeMoq.It.isAny(), TypeMoq.It.isAny()), TypeMoq.Times.once());
 
             // start and complete emitted regardless of successful or error
@@ -126,7 +133,7 @@ suite('Query Runner tests', () => {
         queryRunner.eventEmitter = testEventEmitter.object;
         queryRunner.uri = testuri;
 
-        return queryRunner.runQuery(testSelection).then(undefined, () => {
+        return queryRunner.runQuery(testSelection, executionPlanOptions).then(undefined, () => {
             testStatusView.verify(x => x.executedQuery(TypeMoq.It.isAnyString()), TypeMoq.Times.once());
             assert.strictEqual(queryRunner.isExecutingQuery, false);
             testEventEmitter.verify(x => x.emit('start'), TypeMoq.Times.once());
@@ -164,7 +171,7 @@ suite('Query Runner tests', () => {
                     testVscodeWrapper.object
                 );
         queryRunner.eventEmitter = testEventEmitter.object;
-        return queryRunner.runQuery(testSelection).then(() => {
+        return queryRunner.runQuery(testSelection, executionPlanOptions).then(() => {
             // Expected emit for start and complete
             testEventEmitter.verify(x => x.emit('start'), TypeMoq.Times.once());
             testEventEmitter.verify(x => x.emit('complete'), TypeMoq.Times.once());
@@ -232,7 +239,7 @@ suite('Query Runner tests', () => {
                 selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
                 messages: [{time: '', message: '6 affected rows'}],
                 resultSetSummaries: [],
-                specialAction: SpecialAction.None
+                specialAction: undefined
             }
         };
 
@@ -254,7 +261,7 @@ suite('Query Runner tests', () => {
             selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
             messages: null,                 // tslint:disable-line:no-null-keyword
             resultSetSummaries: [],
-            specialAction: SpecialAction.None
+            specialAction: undefined
         };
         let mockEventEmitter = TypeMoq.Mock.ofType(EventEmitter, TypeMoq.MockBehavior.Strict);
         mockEventEmitter.setup(x => x.emit('batchComplete', TypeMoq.It.isAny()));
@@ -286,7 +293,7 @@ suite('Query Runner tests', () => {
                 columnInfo: [],
                 id: 0,
                 rowCount: 10,
-                specialAction: SpecialAction.None
+                specialAction: undefined
             }
         };
 
@@ -305,7 +312,7 @@ suite('Query Runner tests', () => {
             selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
             messages: null,                 // tslint:disable-line:no-null-keyword
             resultSetSummaries: [],
-            specialAction: SpecialAction.None
+            specialAction: undefined
         };
         let mockEventEmitter = TypeMoq.Mock.ofType(EventEmitter, TypeMoq.MockBehavior.Strict);
         mockEventEmitter.setup(x => x.emit('resultSet', TypeMoq.It.isAny()));
@@ -326,11 +333,11 @@ suite('Query Runner tests', () => {
         // ... Create resultset completion results
         let resultSetComplete1: QueryExecuteResultSetCompleteNotificationParams = {
             ownerUri: 'uri',
-            resultSetSummary: {batchId: 0, columnInfo: [], id: 0, rowCount: 10, specialAction: SpecialAction.None}
+            resultSetSummary: {batchId: 0, columnInfo: [], id: 0, rowCount: 10, specialAction: undefined}
         };
         let resultSetComplete2: QueryExecuteResultSetCompleteNotificationParams = {
             ownerUri: 'uri',
-            resultSetSummary: {batchId: 0, columnInfo: [], id: 1, rowCount: 10, specialAction: SpecialAction.None}
+            resultSetSummary: {batchId: 0, columnInfo: [], id: 1, rowCount: 10, specialAction: undefined}
         };
 
         // ... Create a mock event emitter to receive the events
@@ -353,7 +360,7 @@ suite('Query Runner tests', () => {
             selection: {startLine: 0, endLine: 0, startColumn: 3, endColumn: 3},
             messages: null,                 // tslint:disable-line:no-null-keyword
             resultSetSummaries: [],
-            specialAction: SpecialAction.None
+            specialAction: undefined
         };
         queryRunner.eventEmitter = mockEventEmitter.object;
         queryRunner.handleResultSetComplete(resultSetComplete1);
@@ -385,7 +392,7 @@ suite('Query Runner tests', () => {
                 executionElapsed: undefined,
                 executionStart: new Date().toISOString(),
                 executionEnd: new Date().toISOString(),
-                specialAction: SpecialAction.None
+                specialAction: undefined
             }]
         };
 
@@ -524,12 +531,12 @@ suite('Query Runner tests', () => {
                         { columnName: 'Col1' },
                         { columnName: 'Col2' }
                     ],
-                    specialAction: SpecialAction.None
+                    specialAction: undefined
                 }],
                 executionElapsed: undefined,
                 executionStart: new Date().toISOString(),
                 executionEnd: new Date().toISOString(),
-                specialAction: SpecialAction.None
+                specialAction: undefined
             }]
         };
 
