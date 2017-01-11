@@ -58,9 +58,7 @@ export default class MainController implements vscode.Disposable {
         // Settup default options for execution plan
         this._defaultExecutionPlanOptions = {
             includeEstimatedExecutionPlanXml: false,
-            includeActualExecutionPlanXml: false,
-            includeActualExecutionPlanText: false,
-            includeEstimatedExecutionPlanText: false
+            includeActualExecutionPlanXml: false
         };
     }
 
@@ -298,9 +296,7 @@ export default class MainController implements vscode.Disposable {
     public onEstimatedExecutionPlan(): void {
         let options: IExecutionPlanOptions = {
             includeEstimatedExecutionPlanXml: true,
-            includeActualExecutionPlanXml: false,
-            includeActualExecutionPlanText: false,
-            includeEstimatedExecutionPlanText: false
+            includeActualExecutionPlanXml: false
         };
 
         // Run the query with estimated showplan turned on

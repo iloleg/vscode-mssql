@@ -36,9 +36,7 @@ suite('Query Runner tests', () => {
         testVscodeWrapper = TypeMoq.Mock.ofType(VscodeWrapper, TypeMoq.MockBehavior.Strict);
         testStatusView = TypeMoq.Mock.ofType(StatusView, TypeMoq.MockBehavior.Strict);
         executionPlanOptions = {
-            includeActualExecutionPlanText: false,
             includeActualExecutionPlanXml: false,
-            includeEstimatedExecutionPlanText: false,
             includeEstimatedExecutionPlanXml: false
         };
 
